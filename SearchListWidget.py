@@ -45,7 +45,7 @@ class SearchListWidget(QWidget):
 
     def on_song_item_selected(self, modelIndex):
         self.selectedSong = self.searchList[modelIndex.row()]
-        print(self.selectedSong.songName)
+        print(self.selectedSong.name)
 
     def on_select_btn_clicked(self):
         if self.selectedSong is None:
@@ -58,6 +58,6 @@ class SearchListWidget(QWidget):
         stringList = []
 
         for song in self.searchList:
-            stringList.append(song.songName)
+            stringList.append(song.name)
 
         self.searchListView.model().setStringList(stringList)

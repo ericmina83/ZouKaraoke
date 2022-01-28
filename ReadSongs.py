@@ -12,18 +12,18 @@ class Singer():
 
 
 class Song():
-    def __init__(self, songPath, songId, songLang, singer, songName):
-        self.songPath = songPath
-        self.songName = songName
-        self.songId = songId
-        self.songLang = songLang
+    def __init__(self, path, id, lang, singer, name):
+        self.path = path
+        self.name = name
+        self.id = id
+        self.lang = lang
         self.singer = singer
 
-        if songId[0] == 'a':
+        if id[0] == 'a':
             print('國語')
 
     def output_csv(self):
-        return self.songId + "," + self.songLang + "," + self.songName + "," + self.singer + "," + self.songPath
+        return self.id + "," + self.lang + "," + self.name + "," + self.singer + "," + self.path
 
 
 def check_filename(basename, extension):

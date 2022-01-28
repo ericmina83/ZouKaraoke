@@ -31,12 +31,12 @@ class MainWindow(QWidget):
     def print_songs(self):
         print('---------')
         for song in self.songs:
-            print(song.songName)
+            print(song.name)
 
     def print_play_list(self):
         print('---------')
         for song in self.playList:
-            print(song.songName)
+            print(song.name)
 
     def get_songs_path_from_input_dialog(self):
         songsPath = QFileDialog.getExistingDirectory(
