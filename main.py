@@ -2,6 +2,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QListView, QPushButton, QHBox
 from ReadSongs import *
 from PyPlayer import PlayerWindow
 from PyQt5.QtCore import QStringListModel
+import PlayListWidget
 import sys
 
 
@@ -12,32 +13,9 @@ class MainWindow(QWidget):
         self.playerWindow = PlayerWindow()
 
         self.get_songs_path_from_input_dialog()
-        self.playList = self.songs.copy()  # songs will be played
-        self.selectedPlayListSong = None
 
-        # column 1, play list view
-        self.playListView = QListView()
-        self.playListView.setModel(QStringListModel())
-        self.update_play_list_view()
-        self.playListView.clicked.connect(self.play_list_view_selected)
-
-        # column 1, button bar, insert button
-        self.insertBtn = QPushButton("插播")
-        self.insertBtn.clicked.connect(self.on_play_list_insert_btn_clicked)
-
-        # column 1, button bar, remove button
-        self.removeBtn = QPushButton("移除")
-        self.removeBtn.clicked.connect(self.on_play_list_remove_btn_clicked)
-
-        # column 1, button bar
-        buttonBar = QHBoxLayout()
-        buttonBar.addWidget(self.insertBtn)
-        buttonBar.addWidget(self.removeBtn)
-
-        # column 1
-        column1 = QVBoxLayout()
-        column1.addWidget(self.playListView)
-        column1.addLayout(buttonBar)
+        # column 1: play list widget
+        self.playListWidget = PlayListWidget.PlayListWidget(self)
 
         # column 2
         self.songsListView = QListView()
@@ -45,7 +23,7 @@ class MainWindow(QWidget):
 
         # total horizontal box
         hbox = QHBoxLayout()
-        hbox.addLayout(column1)
+        hbox.addWidget(self.playListWidget)
 
         self.setLayout(hbox)
 
@@ -58,35 +36,6 @@ class MainWindow(QWidget):
         print('---------')
         for song in self.playList:
             print(song.songName)
-
-    def on_play_list_insert_btn_clicked(self):
-        if self.selectedPlayListSong is None:
-            QMessageBox.information(self, '錯誤', '請選擇歌曲後才能插播')
-        else:
-            self.playList.remove(self.selectedPlayListSong)
-            self.playList.insert(0, self.selectedPlayListSong)
-            self.selectedPlayListSong = None
-            self.update_play_list_view()
-
-    def on_play_list_remove_btn_clicked(self):
-        if self.selectedPlayListSong is None:
-            QMessageBox.information(self, '錯誤', '請選擇歌曲後才能移除')
-        else:
-            self.playList.remove(self.selectedPlayListSong)
-            self.selectedPlayListSong = None
-            self.update_play_list_view()
-
-    def play_list_view_selected(self, modelIndex):
-        self.selectedPlayListSong = self.playList[modelIndex.row()]
-        print(self.selectedPlayListSong.songName)
-
-    def update_play_list_view(self):
-        stringList = []
-
-        for song in self.playList:
-            stringList.append(song.songName)
-
-        self.playListView.model().setStringList(stringList)
 
     def get_songs_path_from_input_dialog(self):
         songsPath = QFileDialog.getExistingDirectory(
