@@ -6,6 +6,9 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QStyle, QPushButton, QHBoxLayo
 import sys
 from os import path
 from ReadSongs import *
+from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+from ctypes import cast, POINTER
+from comtypes import CLSCTX_ALL
 
 
 class PlayerWindow(QWidget):
@@ -24,7 +27,38 @@ class PlayerWindow(QWidget):
         p.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.red)
         self.setPalette(p)
 
-        self.create_player()
+        # Get default audio device using PyCAW
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(
+            IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        self.volume = cast(interface, POINTER(IAudioEndpointVolume))
+
+        # column 1 left side valume slider
+        self.leftSideValumeSlider = QSlider(Qt.Orientation.Vertical)
+        self.leftSideValumeSlider.setRange(0, 100)
+        self.leftSideValumeSlider.sliderMoved.connect(
+            self.on_left_side_valume_slider_position_changed)
+        self.leftSideValumeSlider.setSliderPosition(
+            int(self.volume.GetChannelVolumeLevelScalar(0) * 100))
+
+        # column 2 player
+        vbox = self.create_player()
+
+        # column 3 right side valume slider
+        self.rightSideValumeSlider = QSlider(Qt.Orientation.Vertical)
+        self.rightSideValumeSlider.setRange(0, 100)
+        self.rightSideValumeSlider.sliderMoved.connect(
+            self.on_right_side_valume_slider_position_changed)
+        self.rightSideValumeSlider.setSliderPosition(
+            int(self.volume.GetChannelVolumeLevelScalar(1) * 100))
+
+        # hbox (parent)
+        hbox = QHBoxLayout()
+        hbox.addWidget(self.leftSideValumeSlider)
+        hbox.addLayout(vbox)
+        hbox.addWidget(self.rightSideValumeSlider)
+
+        self.setLayout(hbox)
 
     def load_and_paly_video(self, song: Song):
         self.song = song
@@ -52,6 +86,14 @@ class PlayerWindow(QWidget):
             self.playing = False
         else:
             self.playing = True
+
+    def on_left_side_valume_slider_position_changed(self, position):
+        self.volume.SetChannelVolumeLevelScalar(
+            0, position / 100., None)  # Left
+
+    def on_right_side_valume_slider_position_changed(self, position):
+        self.volume.SetChannelVolumeLevelScalar(
+            1, position / 100., None)  # Right
 
     def position_changed(self, position):
         self.slider.setValue(position)
@@ -93,4 +135,4 @@ class PlayerWindow(QWidget):
         self.mediaPlayer.durationChanged.connect(self.duration_changed)
         self.mediaPlayer.positionChanged.connect(self.position_changed)
 
-        self.setLayout(vbox)
+        return vbox

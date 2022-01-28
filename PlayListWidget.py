@@ -1,5 +1,5 @@
 from PyQt5.QtCore import QStringListModel
-from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox
 from ReadSongs import *
 from PyPlayer import PlayerWindow
 
