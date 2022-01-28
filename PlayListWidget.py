@@ -12,33 +12,35 @@ class PlayListWidget(QWidget):
         self.mainWindow = mainWindow
         self.selectedSong = None
 
-        self.playList = self.mainWindow.songs.copy()  # songs will be played
+        self.playList = []  # songs will be played
+        # self.playList = self.mainWindow.songs.copy()
+
+        # column 1
+        column1 = QVBoxLayout()
 
         # column 1, play list view
         self.playListView = QListView()
         self.playListView.setModel(QStringListModel())
-        self.update_play_list_view()
         self.playListView.clicked.connect(self.on_song_item_selected)
+        column1.addWidget(self.playListView)
+
+        # column 1, button bar
+        buttonBar = QHBoxLayout()
+        column1.addLayout(buttonBar)
 
         # column 1, button bar, insert button
         self.insertBtn = QPushButton("插播")
         self.insertBtn.clicked.connect(self.on_insert_btn_clicked)
+        buttonBar.addWidget(self.insertBtn)
 
         # column 1, button bar, remove button
         self.removeBtn = QPushButton("移除")
         self.removeBtn.clicked.connect(self.on_remove_btn_clicked)
-
-        # column 1, button bar
-        buttonBar = QHBoxLayout()
-        buttonBar.addWidget(self.insertBtn)
         buttonBar.addWidget(self.removeBtn)
 
-        # column 1
-        column1 = QVBoxLayout()
-        column1.addWidget(self.playListView)
-        column1.addLayout(buttonBar)
-
         self.setLayout(column1)
+
+        self.update_play_list_view()
 
     def on_song_item_selected(self, modelIndex):
         self.selectedSong = self.playList[modelIndex.row()]
