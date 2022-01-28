@@ -1,8 +1,8 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
 from ReadSongs import *
 from PyPlayer import PlayerWindow
-from PyQt5.QtCore import QStringListModel
 import PlayListWidget
+import SearchListWidget
 import sys
 
 
@@ -14,17 +14,18 @@ class MainWindow(QWidget):
 
         self.get_songs_path_from_input_dialog()
 
+        # hbox (parent)
+        hbox = QHBoxLayout()
+
         # column 1: play list widget
         self.playListWidget = PlayListWidget.PlayListWidget(self)
-
-        # column 2
-        self.songsListView = QListView()
-        self.songsListView.setModel(QStringListModel())
-
-        # total horizontal box
-        hbox = QHBoxLayout()
         hbox.addWidget(self.playListWidget)
 
+        # column 2: searching list Widget
+        self.searchListWidget = SearchListWidget.SearchListWidget(self)
+        hbox.addWidget(self.searchListWidget)
+
+        # set parent layout
         self.setLayout(hbox)
 
     def print_songs(self):

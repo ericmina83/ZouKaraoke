@@ -1,12 +1,10 @@
+from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
 from ReadSongs import *
-from main import MainWindow
-from PyQt5.QtCore import QStringListModel
-import sys
 
 
 class PlayListWidget(QWidget):
-    def __init__(self, mainWindow: MainWindow):
+    def __init__(self, mainWindow):
         super().__init__()
 
         self.mainWindow = mainWindow
@@ -40,6 +38,10 @@ class PlayListWidget(QWidget):
 
         self.setLayout(column1)
 
+        self.update_play_list_view()
+
+    def add_song(self, song: Song):
+        self.playList.append(song)
         self.update_play_list_view()
 
     def on_song_item_selected(self, modelIndex):
