@@ -10,7 +10,7 @@ class PlayListWidget(QWidget):
         super().__init__()
 
         self.mainWindow = mainWindow
-        self.selectedPlayListSong = None
+        self.selectedSong = None
 
         self.playList = self.mainWindow.songs.copy()  # songs will be played
 
@@ -18,15 +18,15 @@ class PlayListWidget(QWidget):
         self.playListView = QListView()
         self.playListView.setModel(QStringListModel())
         self.update_play_list_view()
-        self.playListView.clicked.connect(self.play_list_view_selected)
+        self.playListView.clicked.connect(self.on_song_item_selected)
 
         # column 1, button bar, insert button
         self.insertBtn = QPushButton("插播")
-        self.insertBtn.clicked.connect(self.on_play_list_insert_btn_clicked)
+        self.insertBtn.clicked.connect(self.on_insert_btn_clicked)
 
         # column 1, button bar, remove button
         self.removeBtn = QPushButton("移除")
-        self.removeBtn.clicked.connect(self.on_play_list_remove_btn_clicked)
+        self.removeBtn.clicked.connect(self.on_remove_btn_clicked)
 
         # column 1, button bar
         buttonBar = QHBoxLayout()
@@ -40,25 +40,25 @@ class PlayListWidget(QWidget):
 
         self.setLayout(column1)
 
-    def play_list_view_selected(self, modelIndex):
-        self.selectedPlayListSong = self.playList[modelIndex.row()]
-        print(self.selectedPlayListSong.songName)
+    def on_song_item_selected(self, modelIndex):
+        self.selectedSong = self.playList[modelIndex.row()]
+        print(self.selectedSong.songName)
 
-    def on_play_list_insert_btn_clicked(self):
-        if self.selectedPlayListSong is None:
+    def on_insert_btn_clicked(self):
+        if self.selectedSong is None:
             QMessageBox.information(self, '錯誤', '請選擇歌曲後才能插播')
         else:
-            self.playList.remove(self.selectedPlayListSong)
-            self.playList.insert(0, self.selectedPlayListSong)
-            self.selectedPlayListSong = None
+            self.playList.remove(self.selectedSong)
+            self.playList.insert(0, self.selectedSong)
+            self.selectedSong = None
             self.update_play_list_view()
 
-    def on_play_list_remove_btn_clicked(self):
-        if self.selectedPlayListSong is None:
+    def on_remove_btn_clicked(self):
+        if self.selectedSong is None:
             QMessageBox.information(self, '錯誤', '請選擇歌曲後才能移除')
         else:
-            self.playList.remove(self.selectedPlayListSong)
-            self.selectedPlayListSong = None
+            self.playList.remove(self.selectedSong)
+            self.selectedSong = None
             self.update_play_list_view()
 
     def update_play_list_view(self):
