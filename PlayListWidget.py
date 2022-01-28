@@ -9,7 +9,7 @@ class PlayListWidget(QWidget):
         super().__init__()
 
         self.mainWindow = mainWindow
-        self.playerWindow = PlayerWindow()
+        self.playerWindow = PlayerWindow(self)
         self.playerWindow.show()
 
         self.selectedSongIndex = -1
@@ -51,6 +51,17 @@ class PlayListWidget(QWidget):
         else:
             self.playList.append(song)
             self.update_play_list_view()
+
+    def next_song(self):
+        if self.playList:
+            print("next song")
+            song = self.playList[0]
+            del self.playList[0]
+            self.playerWindow.load_and_paly_video(song)
+            self.update_play_list_view()
+        else:
+            QMessageBox.information(self, "Hello", "歌單空了喔！！")
+            print("play list empty")
 
     def on_song_item_selected(self, modelIndex):
         self.selectedSongIndex = modelIndex.row()

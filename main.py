@@ -1,6 +1,5 @@
 from PyQt5.QtWidgets import QApplication, QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
 from ReadSongs import *
-from PyPlayer import PlayerWindow
 import PlayListWidget
 import SearchListWidget
 import sys
@@ -9,8 +8,6 @@ import sys
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
-
-        self.playerWindow = PlayerWindow()
 
         self.get_songs_path_from_input_dialog()
 

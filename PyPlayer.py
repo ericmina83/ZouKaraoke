@@ -9,12 +9,14 @@ from ReadSongs import *
 
 
 class PlayerWindow(QWidget):
-    def __init__(self):
+    def __init__(self, playListWidget):
         super().__init__()
 
         # self.setWindowIcon()
         self.setWindowTitle("Hello world!")
         self.setGeometry(350, 100, 700, 500)
+
+        self.playListWidget = playListWidget
 
         self.playing = False
 
@@ -46,6 +48,7 @@ class PlayerWindow(QWidget):
                 QStyle.StandardPixmap.SP_MediaPlay))
 
         if self.mediaPlayer.state() == QMediaPlayer.State.StoppedState:
+            self.playListWidget.next_song()
             self.playing = False
         else:
             self.playing = True
