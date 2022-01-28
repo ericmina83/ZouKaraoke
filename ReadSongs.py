@@ -1,0 +1,69 @@
+import os
+import re
+
+
+class Song():
+    def __init__(self, songPath, songId, songLang, singer, songName):
+        self.songPath = songPath
+        self.songName = songName
+        self.songId = songId
+        self.songLang = songLang
+        self.singer = singer
+
+    def output_csv(self):
+        return self.songId + "," + self.songLang + "," + self.songName + "," + self.singer + "," + self.songPath
+
+
+def list_all_songs(path):
+    path = os.path.abspath(path)
+    print("Songs abspath: %s" % path)
+
+    idMatch = re.compile('^[a-j][1-8]\d{6}$')
+    langMatch = re.compile("^((國|台|粵|日|喔|客|韓)語|兒歌|其他|原住民)$")
+
+    songs = []
+
+    for (dirpath, dirnames, filenames) in os.walk(path):
+
+        for filename in filenames:
+            basename = os.path.splitext(filename)[0]
+            extension = os.path.splitext(filename)[1]
+
+            songpath = os.path.join(dirpath, filename)
+            print("songpath is %s" % songpath)
+
+            if extension != ".mp4":
+                print("%s is not mp4" % filename)
+                continue
+
+            strs = basename.split("_")
+
+            if len(strs) != 4:
+                print("%s format isn't correct" % filename)
+                continue
+
+            if idMatch.match(strs[0]):
+                print("%s id is ok" % filename)
+            else:
+                print("%s id is not ok" % filename)
+
+            if langMatch.match(strs[1]):
+                print("%s lang is ok" % filename)
+            else:
+                print("%s lang is not ok" % filename)
+
+            songs.append(Song(songpath, strs[0], strs[1], strs[2], strs[3]))
+
+        break  # do 1 time for iterate 1 layer (level)
+
+    return songs
+
+
+def output_csv(songs):
+    outF = open("myOutFile.csv", "w", encoding='utf8')
+
+    for song in songs:
+        outF.write(song.output_csv())
+        outF.write("\n")
+
+    outF.close()
