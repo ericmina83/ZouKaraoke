@@ -2,7 +2,7 @@ import os
 import re
 
 idMatch = re.compile('^[a-j][1-8]\d{6}$')
-langMatch = re.compile("^((國|台|粵|日|喔|客|韓)語|兒歌|其他|原住民)$")
+langMatch = re.compile("^((國|台|粵|日|英|客|韓)語|兒歌|其他|原住民)$")
 
 
 class Singer():
@@ -19,6 +19,9 @@ class Song():
         self.songLang = songLang
         self.singer = singer
 
+        if songId[0] == 'a':
+            print('國語')
+
     def output_csv(self):
         return self.songId + "," + self.songLang + "," + self.songName + "," + self.singer + "," + self.songPath
 
@@ -31,7 +34,7 @@ def check_filename(basename, extension):
 
     strs = basename.split("_")
 
-    if len(strs) != 4:
+    if len(strs) < 4:
         print("%s format isn't correct" % basename)
         return False
 
