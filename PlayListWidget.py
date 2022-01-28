@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
 from ReadSongs import *
+from PyPlayer import PlayerWindow
 
 
 class PlayListWidget(QWidget):
@@ -8,6 +9,9 @@ class PlayListWidget(QWidget):
         super().__init__()
 
         self.mainWindow = mainWindow
+        self.playerWindow = PlayerWindow()
+        self.playerWindow.show()
+
         self.selectedSongIndex = -1
 
         self.playList = []  # songs will be played
@@ -41,8 +45,12 @@ class PlayListWidget(QWidget):
         self.update_play_list_view()
 
     def add_song(self, song: Song):
-        self.playList.append(song)
-        self.update_play_list_view()
+
+        if self.playerWindow.playing is False and not self.playList:
+            self.playerWindow.load_and_paly_video(song)
+        else:
+            self.playList.append(song)
+            self.update_play_list_view()
 
     def on_song_item_selected(self, modelIndex):
         self.selectedSongIndex = modelIndex.row()

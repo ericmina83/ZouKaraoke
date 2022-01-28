@@ -1,12 +1,14 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QStyle, QSlider, QFileDialog
-from PyQt5.QtGui import QIcon, QPalette, QColor
+from PyQt5.QtGui import QIcon, QPalette
 from PyQt5.QtCore import Qt, QUrl
-from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent, QAudio
 from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtWidgets import QWidget, QFileDialog, QStyle, QPushButton, QHBoxLayout, QSlider, QVBoxLayout
 import sys
+from os import path
+from ReadSongs import *
 
 
-class Window(QWidget):
+class PlayerWindow(QWidget):
     def __init__(self):
         super().__init__()
 
@@ -14,19 +16,20 @@ class Window(QWidget):
         self.setWindowTitle("Hello world!")
         self.setGeometry(350, 100, 700, 500)
 
+        self.playing = False
+
         p = self.palette()
         p.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.red)
         self.setPalette(p)
 
         self.create_player()
 
-    def open_file(self):
-        filename, _ = QFileDialog.getOpenFileName(self, "Open Video")
-
-        if filename != '':
-            self.mediaPlayer.setMedia(
-                QMediaContent(QUrl.fromLocalFile(filename)))
-            self.playBtn.setEnabled(True)
+    def load_and_paly_video(self, song: Song):
+        self.song = song
+        mediaContent = QMediaContent(QUrl.fromLocalFile(song.path))
+        self.mediaPlayer.setMedia(mediaContent)
+        self.playBtn.setEnabled(True)
+        self.play_video()
 
     def play_video(self):
         if self.mediaPlayer.state() == QMediaPlayer.State.PlayingState:
@@ -42,6 +45,11 @@ class Window(QWidget):
             self.playBtn.setIcon(self.style().standardIcon(
                 QStyle.StandardPixmap.SP_MediaPlay))
 
+        if self.mediaPlayer.state() == QMediaPlayer.State.StoppedState:
+            self.playing = False
+        else:
+            self.playing = True
+
     def position_changed(self, position):
         self.slider.setValue(position)
 
@@ -56,10 +64,6 @@ class Window(QWidget):
 
         videoWidget = QVideoWidget()
 
-        # open video button
-        self.openBtn = QPushButton("Open Video")
-        self.openBtn.clicked.connect(self.open_file)
-
         # play vidoe button
         self.playBtn = QPushButton()
         self.playBtn.setEnabled(False)
@@ -73,7 +77,6 @@ class Window(QWidget):
 
         hbox = QHBoxLayout()
         hbox.setContentsMargins(0, 0, 0, 0)
-        hbox.addWidget(self.openBtn)
         hbox.addWidget(self.playBtn)
         hbox.addWidget(self.slider)
 
@@ -88,9 +91,3 @@ class Window(QWidget):
         self.mediaPlayer.positionChanged.connect(self.position_changed)
 
         self.setLayout(vbox)
-
-
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-sys.exit(app.exec_())
