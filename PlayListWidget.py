@@ -8,7 +8,7 @@ class PlayListWidget(QWidget):
         super().__init__()
 
         self.mainWindow = mainWindow
-        self.selectedSong = None
+        self.selectedSongIndex = -1
 
         self.playList = []  # songs will be played
         # self.playList = self.mainWindow.songs.copy()
@@ -45,24 +45,24 @@ class PlayListWidget(QWidget):
         self.update_play_list_view()
 
     def on_song_item_selected(self, modelIndex):
-        self.selectedSong = self.playList[modelIndex.row()]
-        print(self.selectedSong.name)
+        self.selectedSongIndex = modelIndex.row()
 
     def on_insert_btn_clicked(self):
-        if self.selectedSong is None:
+        if self.selectedSongIndex is -1:
             QMessageBox.information(self, '錯誤', '請選擇歌曲後才能插播')
         else:
-            self.playList.remove(self.selectedSong)
-            self.playList.insert(0, self.selectedSong)
-            self.selectedSong = None
+            song = self.playList[self.selectedSongIndex]
+            del self.playList[self.selectedSongIndex]
+            self.playList.insert(0, song)
+            self.selectedSongIndex = -1
             self.update_play_list_view()
 
     def on_remove_btn_clicked(self):
-        if self.selectedSong is None:
+        if self.selectedSongIndex is -1:
             QMessageBox.information(self, '錯誤', '請選擇歌曲後才能移除')
         else:
-            self.playList.remove(self.selectedSong)
-            self.selectedSong = None
+            del self.playList[self.selectedSongIndex]
+            self.selectedSongIndex = -1
             self.update_play_list_view()
 
     def update_play_list_view(self):
