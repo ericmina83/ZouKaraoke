@@ -66,7 +66,9 @@ class PlayerWindow(QWidget):
 
     def load_and_paly_video(self, song: Song):
         self.song = song
-        mediaContent = QMediaContent(QUrl.fromLocalFile(song.path))
+        url = QUrl.fromLocalFile(song.path)
+        print(url)
+        mediaContent = QMediaContent(url)
         self.mediaPlayer.setMedia(mediaContent)
         self.playBtn.setEnabled(True)
         self.play_video()

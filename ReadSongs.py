@@ -48,13 +48,13 @@ langs = {
 
 singerTypes = {
     SingerType.NONE: "不考慮",
-    SingerType.FEMALE: "女單",
-    SingerType.MALE: "男單",
-    SingerType.GROUP: "團體",
+    SingerType.FEMALE: "國語女歌手",
+    SingerType.MALE: "國語男歌手",
+    SingerType.GROUP: "國語團體",
     SingerType.TOGATHER: "合唱",
-    SingerType.FOREIGN_FEMALE: "外女",
-    SingerType.FOREIGN_MALE: "外男",
-    SingerType.FOREIGN_GROUP: "外團",
+    SingerType.FOREIGN_FEMALE: "外語女歌手",
+    SingerType.FOREIGN_MALE: "外語男歌手",
+    SingerType.FOREIGN_GROUP: "外語團體",
     SingerType.OTHER: "其他",
 }
 

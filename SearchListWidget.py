@@ -33,6 +33,9 @@ class SearchListWidget(QWidget):
         if self.songNameEdit.text().upper() not in song.name.upper():
             return False
 
+        if self.idEdit.text().upper() not in song.id.upper():
+            return False
+
         currentSingerType = list(SingerType)[self.singerTypeBox.currentIndex()]
 
         if currentSingerType is not song.singerType and currentSingerType is not SingerType.NONE:
@@ -61,19 +64,53 @@ class SearchListWidget(QWidget):
         # VBox
         vbox = QVBoxLayout()
 
+        # HBox id
+        hboxId = QHBoxLayout()
+        vbox.addLayout(hboxId)
+
+        # HBox id, label
+        idLabel = QLabel()
+        idLabel.setText("歌號：")
+        hboxId.addWidget(idLabel)
+
+        # HBox id, Line edit
+        self.idEdit = QLineEdit()
+        self.idEdit.textChanged.connect(self.on_edit_text_changed)
+        hboxId.addWidget(self.idEdit)
+
+        # HBox lang
+        hboxLang = QHBoxLayout()
+        vbox.addLayout(hboxLang)
+
+        # HBox lang, label
+        langLabel = QLabel()
+        langLabel.setText("語言：")
+        hboxLang.addWidget(langLabel)
+
+        # HBox lang, combobox
         self.langBox = QComboBox()
         self.langBox.addItems(
             list(map(lambda x: langs[x], Lang)))
         self.langBox.currentIndexChanged.connect(
             self.on_singer_type_box_index_changed)
-        vbox.addWidget(self.langBox)
+        hboxLang.addWidget(self.langBox)
 
+        # HBox singerType
+        hboxSingerType = QHBoxLayout()
+        vbox.addLayout(hboxSingerType)
+
+        # HBox singerType, label
+        singerTypeLabel = QLabel()
+        singerTypeLabel.setText("歌手類型：")
+        hboxSingerType.addWidget(singerTypeLabel)
+
+        # HBox singerType, combobox
         self.singerTypeBox = QComboBox()
         self.singerTypeBox.addItems(
             list(map(lambda x: singerTypes[x], SingerType)))
         self.singerTypeBox.currentIndexChanged.connect(
             self.on_singer_type_box_index_changed)
-        vbox.addWidget(self.singerTypeBox)
+        hboxSingerType.addWidget(self.singerTypeBox)
 
         # HBox singer
         hbox1 = QHBoxLayout()

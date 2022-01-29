@@ -40,6 +40,11 @@ class PlayListWidget(QWidget):
         self.removeBtn.clicked.connect(self.on_remove_btn_clicked)
         buttonBar.addWidget(self.removeBtn)
 
+        # column 1, button bar, cut button
+        self.cutBtn = QPushButton("移除")
+        self.cutBtn.clicked.connect(self.on_cut_btn_clicked)
+        buttonBar.addWidget(self.cutBtn)
+
         self.setLayout(column1)
 
         self.update_play_list_view()
@@ -83,6 +88,12 @@ class PlayListWidget(QWidget):
             del self.playList[self.selectedSongIndex]
             self.selectedSongIndex = -1
             self.update_play_list_view()
+
+    def on_cut_btn_clicked(self):
+        if self.playerWindow.playing:
+            self.playerWindow.mediaPlayer.stop()
+        else:
+            QMessageBox.information(self, '錯誤', '沒有歌曲再撥放喔！')
 
     def update_play_list_view(self):
         stringList = []
