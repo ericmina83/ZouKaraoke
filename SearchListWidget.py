@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QLineEdit, QLabel
+from PyQt5.QtWidgets import QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QLineEdit, QLabel, QComboBox
 from PyQt5.QtCore import QStringListModel
 from ReadSongs import *
 import sys
@@ -27,23 +27,41 @@ class SearchListWidget(QWidget):
         self.update_search_list_view()
 
     def check_song_correct_or_not(self, song: Song):
-        if self.singerEdit.text() not in song.singer:
+        if self.singerEdit.text().upper() not in song.singer.upper():
             return False
 
-        if self.songNameEdit.text() not in song.name:
+        if self.songNameEdit.text().upper() not in song.name.upper():
+            return False
+
+        currentSingerType = list(SingerType)[self.singerTypeBox.currentIndex()]
+
+        if currentSingerType is not song.singerType and currentSingerType is not SingerType.NONE:
             return False
 
         return True
 
-    def on_edit_text_changed(self, str):
+    def check_every_songs_correct_or_not(self):
         self.searchList = list(
             filter(self.check_song_correct_or_not, self.mainWindow.songs))
 
         self.update_search_list_view()
 
+    def on_edit_text_changed(self, str):
+        self.check_every_songs_correct_or_not()
+
+    def on_singer_type_box_index_changed(self, index):
+        self.check_every_songs_correct_or_not()
+
     def create_column2(self):
         # VBox
         vbox = QVBoxLayout()
+
+        self.singerTypeBox = QComboBox()
+        self.singerTypeBox.addItems(
+            list(map(lambda x: singerTypes[x], SingerType)))
+        self.singerTypeBox.currentIndexChanged.connect(
+            self.on_singer_type_box_index_changed)
+        vbox.addWidget(self.singerTypeBox)
 
         # HBox singer
         hbox1 = QHBoxLayout()

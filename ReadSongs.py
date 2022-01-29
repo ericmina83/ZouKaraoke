@@ -1,14 +1,69 @@
 import os
 import re
+from enum import Enum
 
 idMatch = re.compile('^[a-j][1-8]\d{6}$')
 langMatch = re.compile("^((國|台|粵|日|英|客|韓)語|兒歌|其他|原住民)$")
 
 
+class Lang(Enum):
+    NONE = ' '
+    CHINESE = 'a'
+    TAIWANESE = 'b'
+    HK = 'c'
+    JAPANESE = 'd'
+    ENGLISH = 'e'
+    HAKKA = 'f'
+    ORIGINAL = 'g'
+    KOREAN = 'h'
+    CHILDREN = 'i'
+    OTHER = 'j'
+
+
+class SingerType(Enum):
+    NONE = 0
+    FEMALE = 1
+    MALE = 2
+    GROUP = 3
+    TOGATHER = 4
+    FOREIGN_FEMALE = 5
+    FOREIGN_MALE = 6
+    FOREIGN_GROUP = 7
+    OTHER = 8
+
+
+langs = {
+    Lang.NONE: '不考慮',
+    Lang.CHINESE: '國語',
+    Lang.TAIWANESE: '台語',
+    Lang.HK: '粵語',
+    Lang.JAPANESE: '日語',
+    Lang.ENGLISH: '英語',
+    Lang.HAKKA: '客語',
+    Lang.ORIGINAL: '原住民語',
+    Lang.KOREAN: '韓語',
+    Lang.CHILDREN: '兒歌',
+    Lang.OTHER: '其他',
+}
+
+singerTypes = {
+    SingerType.NONE: "不考慮",
+    SingerType.FEMALE: "女單",
+    SingerType.MALE: "男單",
+    SingerType.GROUP: "團體",
+    SingerType.TOGATHER: "合唱",
+    SingerType.FOREIGN_FEMALE: "外女",
+    SingerType.FOREIGN_MALE: "外男",
+    SingerType.FOREIGN_GROUP: "外團",
+    SingerType.OTHER: "其他",
+}
+
+
 class Singer():
-    def __init__(self, name, gender):
+    def __init__(self, name, gender, singerType):
         self.name = name
         self.gender = gender
+        self.singerType = singerType
 
 
 class Song():
@@ -16,14 +71,12 @@ class Song():
         self.path = path
         self.name = name
         self.id = id
-        self.lang = lang
+        self.lang = Lang(id[0])
         self.singer = singer
-
-        if id[0] == 'a':
-            print('國語')
+        self.singerType = SingerType(int(id[1]))
 
     def output_csv(self):
-        return self.id + "," + self.lang + "," + self.name + "," + self.singer + "," + self.path
+        return self.id + "," + langs[self.lang] + "," + self.name + "," + self.singer + ',' + singerTypes[self.singerType] + "," + self.path
 
 
 def check_filename(basename, extension):
