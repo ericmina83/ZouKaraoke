@@ -38,6 +38,11 @@ class SearchListWidget(QWidget):
         if currentSingerType is not song.singerType and currentSingerType is not SingerType.NONE:
             return False
 
+        currentLang = list(Lang)[self.langBox.currentIndex()]
+
+        if currentLang is not song.lang and currentLang is not Lang.NONE:
+            return False
+
         return True
 
     def check_every_songs_correct_or_not(self):
@@ -55,6 +60,13 @@ class SearchListWidget(QWidget):
     def create_column2(self):
         # VBox
         vbox = QVBoxLayout()
+
+        self.langBox = QComboBox()
+        self.langBox.addItems(
+            list(map(lambda x: langs[x], Lang)))
+        self.langBox.currentIndexChanged.connect(
+            self.on_singer_type_box_index_changed)
+        vbox.addWidget(self.langBox)
 
         self.singerTypeBox = QComboBox()
         self.singerTypeBox.addItems(
