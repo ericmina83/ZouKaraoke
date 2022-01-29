@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QApplication, QWidget, QListView, QPushButton, QHBoxLayout, QVBoxLayout, QMessageBox, QFileDialog
+from PyQt5.QtWidgets import QApplication, QWidget, QHBoxLayout, QFileDialog, QMessageBox, QAction
 from ReadSongs import *
 import PlayListWidget
 import SearchListWidget
@@ -10,6 +10,9 @@ class MainWindow(QWidget):
         super().__init__()
 
         self.get_songs_path_from_input_dialog()
+
+        quit = QAction("Quit", self)
+        quit.triggered.connect(self.closeEvent)
 
         # hbox (parent)
         hbox = QHBoxLayout()
@@ -41,6 +44,18 @@ class MainWindow(QWidget):
 
         self.songs = list_all_songs(songsPath)
         output_csv(self.songs)
+
+    def closeEvent(self, event):
+        close = QMessageBox()
+        close.setText("你確定要離開嗎?")
+        close.setStandardButtons(QMessageBox.Yes | QMessageBox.Cancel)
+        close = close.exec()
+
+        if close == QMessageBox.Yes:
+            event.accept()
+            self.playListWidget.close_player()
+        else:
+            event.ignore()
 
 
 if __name__ == '__main__':

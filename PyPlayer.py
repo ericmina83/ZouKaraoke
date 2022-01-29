@@ -23,6 +23,10 @@ class PlayerWindow(QWidget):
 
         self.playing = False
 
+        self.setWindowFlags(Qt.WindowType.Window
+                            | Qt.WindowType.WindowMinimizeButtonHint
+                            | Qt.WindowType.WindowMaximizeButtonHint)
+
         p = self.palette()
         p.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.red)
         self.setPalette(p)

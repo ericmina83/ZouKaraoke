@@ -91,3 +91,6 @@ class PlayListWidget(QWidget):
             stringList.append(song.name)
 
         self.playListView.model().setStringList(stringList)
+
+    def close_player(self):
+        self.playerWindow.close()
