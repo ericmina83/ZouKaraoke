@@ -75,23 +75,33 @@ class Singer():
         self.gender = gender
         self.singerType = singerType
 
+mainwindow = None
 
 class Song():
-    def __init__(self, path, id, lang, singer, name):
-        self.path = path
-        self.name = name
-        self.id = id
-        self.lang = Lang(id[0])
-        self.singer = singer
-        self.singerType = SingerType(int(id[1]))
+    def __init__(self, path, id, lang, singer, name, song_original_path):
+
+        if song_original_path is None:
+            self.path = path
+            self.name = name
+            self.id = id
+            self.lang = Lang(id[0])
+            self.singer = singer
+            self.singerType = SingerType(int(id[1]))
+        else:
+            self.name = name
+            self.id = ""
+            self.lang = Lang.NONE
+            self.singer = ""
+            self.singerType = SingerType.NONE
+            self.path = song_original_path
 
     def output_csv(self):
         return self.id + "," + langs[self.lang] + "," + self.name + "," + self.singer + ',' + singerTypes[self.singerType] + "," + self.path
 
 
-def check_filename(basename, extension):
+def check_filename(basename: str, extension: str):
 
-    if extension != ".mp4":
+    if extension.upper() != ".mp4".upper():
         print("%s is not mp4" % basename)
         return False
 
@@ -131,7 +141,7 @@ def list_all_songs(path):
 
             strs = basename.split("_")
 
-            songs.append(Song(songpath, strs[0], strs[1], strs[2], strs[3]))
+            songs.append(Song(songpath, strs[0], strs[1], strs[2], strs[3], None))
 
         break  # do 1 time for iterate 1 layer (level)
 
@@ -207,6 +217,11 @@ class PlayListWidget(QWidget):
         # column 1
         column1 = QVBoxLayout()
 
+        # column 1, add song from file
+        self.addSongBtn = QPushButton("加入新載歌曲")
+        self.addSongBtn.clicked.connect(self.on_add_song_from_file_clicked)
+        column1.addWidget(self.addSongBtn)
+
         # column 1, play list view
         self.playListView = QListView()
         self.playListView.setModel(QStringListModel())
@@ -237,6 +252,17 @@ class PlayListWidget(QWidget):
         self.setLayout(column1)
 
         self.update_play_list_view()
+
+    def on_add_song_from_file_clicked(self):
+        filename, _ = QFileDialog.getOpenFileName(self, "載入新檔案")
+        if filename != '':
+            basename = os.path.splitext(os.path.basename(filename))[0]
+            extension = os.path.splitext(os.path.basename(filename))[1]
+
+            if extension.upper() != '.MP4':
+                QMessageBox.information(self, "有問題", "檔案不是 MP4 喔！")
+            else:
+                self.add_song(Song(" ", " ", " ", " ", basename, filename))
 
     def add_song(self, song: Song):
 
