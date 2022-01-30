@@ -289,7 +289,7 @@ class PlayListWidget(QWidget):
         stringList = []
 
         for song in self.playList:
-            stringList.append(song.name)
+            stringList.append(song.name + ", " + song.singer)
 
         self.playListView.model().setStringList(stringList)
 
@@ -470,7 +470,7 @@ class SearchListWidget(QWidget):
         stringList = []
 
         for song in self.searchList:
-            stringList.append(song.name)
+            stringList.append(song.name + ", " + song.singer)
 
         self.searchListView.model().setStringList(stringList)
 
@@ -607,6 +607,9 @@ class PlayerWindow(QWidget):
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    app.setStyleSheet("QLabel{font-size: 18pt;}\n\
+                        QListView{font-size: 18pt;}\n\
+                        QButton{font-size: 18pt;}")
     mainwindow = MainWindow()
     mainwindow.show()
     sys.exit(app.exec_())
