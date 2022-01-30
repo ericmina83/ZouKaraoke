@@ -122,7 +122,6 @@ def list_all_songs(path):
 
         for filename in filenames:
             songpath = os.path.join(dirpath, filename)
-            print("songpath is %s" % songpath)
 
             basename = os.path.splitext(filename)[0]
             extension = os.path.splitext(filename)[1]
@@ -527,6 +526,8 @@ class PlayerWindow(QWidget):
         self.setLayout(hbox)
 
     def load_and_paly_video(self, song: Song):
+        self.songNameLabel.setText(song.name)
+        self.singerLabel.setText(song.singer)
         self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(song.path)))
         self.playBtn.setEnabled(True)
         self.play_video()
@@ -576,6 +577,21 @@ class PlayerWindow(QWidget):
 
         videoWidget = QVideoWidget()
 
+        # hbox title and singer
+        titleSingerWidget = QWidget()
+        titleSingerHbox = QHBoxLayout()
+        titleSingerHbox.setAlignment(Qt.AlignmentFlag.AlignTop)
+        titleSingerHbox.setContentsMargins(0, 0, 0, 0)
+        titleSingerWidget.setFixedHeight(40)
+        titleSingerWidget.setContentsMargins(0, 0, 0, 0)
+        titleSingerWidget.setLayout(titleSingerHbox)
+
+        self.songNameLabel = QLabel("歌名")
+        self.singerLabel = QLabel('歌手')
+
+        titleSingerHbox.addWidget(self.songNameLabel)
+        titleSingerHbox.addWidget(self.singerLabel)
+
         # play vidoe button
         self.playBtn = QPushButton()
         self.playBtn.setEnabled(False)
@@ -594,6 +610,7 @@ class PlayerWindow(QWidget):
 
         vbox = QVBoxLayout()
         vbox.setContentsMargins(0, 0, 0, 0)
+        vbox.addWidget(titleSingerWidget)
         vbox.addWidget(videoWidget)
         vbox.addLayout(hbox)
 
