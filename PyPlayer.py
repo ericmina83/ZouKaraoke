@@ -15,7 +15,7 @@ import os
 import re
 from enum import Enum
 
-idMatch = re.compile('^[a-j][1-8]\d{6}$')
+idMatch = re.compile('^[a-j][0-8]\d{6}$')
 langMatch = re.compile("^((國|台|粵|日|英|客|韓)語|兒歌|其他|原住民)$")
 
 
@@ -101,18 +101,24 @@ class Song():
             self.name: str = name
             self.id: str = id
             self.lang: Lang = Lang(id[0])
-            self.singer: Singer = singer
+            self.singers: List[Singer] = singer
             self.singerType = SingerType(int(id[1]))
         else:
             self.name: str = name
             self.id: str = ""
             self.lang: Lang = Lang.NONE
-            self.singer: Singer = Singer("")
+            self.singers: List[Singer] = Singer("")
             self.singerType = SingerType.NONE
             self.path = song_original_path
 
+    def get_singers_name(self):
+        result = self.singers[0].name
+        for i in range(1, len(self.singers)):
+            result += '&' + self.singers[i].name
+        return result
+
     def output_csv(self):
-        return self.id + "," + langs[self.lang] + "," + self.name + "," + self.singer.name + ',' + singerTypes[self.singerType] + "," + self.path
+        return self.id + "," + langs[self.lang] + "," + self.name + "," + self.get_singers_name() + ',' + singerTypes[self.singerType] + "," + self.path
 
 
 def check_filename(basename: str, extension: str):
@@ -128,7 +134,7 @@ def check_filename(basename: str, extension: str):
         return False
 
     if idMatch.match(strs[0]) is None:
-        print("%s id is not ok" % basename)
+        print("%s id: %s is not ok" % basename, strs[0])
         return False
 
     if langMatch.match(strs[1]) is None:
@@ -149,8 +155,6 @@ def diff_two_strings(a: str, b: str) -> float:
             diff_count += 2
         elif s[0] == '+':
             diff_count += 1
-
-    diff_count /= len(a)
 
     return diff_count
 
@@ -175,19 +179,32 @@ def list_all_songs(path):
 
             strs = basename.split("_")
 
-            singers = sorted(
-                singers, key=lambda singer: diff_two_strings(singer.name, strs[2]))
+            singerStrs = strs[2].replace(' ', '').replace('_', '').split('&')
 
-            if len(singers) == 0:
-                singer = Singer(strs[2])
-            elif diff_two_strings(singers[0].name, strs[2]) < 0.4:
-                singer = singers[0]
-            else:
-                singer = Singer(strs[2])
+            targetSinger: List[Singer] = []
+
+            for singerStr in singerStrs:
+                if len(singers) == 0:
+                    singer = Singer(singerStr)
+                    singers.append(singer)
+                else:
+                    singer = next(
+                        (singer for singer in singers if singerStr == singer.name),
+                        None)
+
+                    if singer is None:
+                        singer = Singer(singerStr)
+                        singers.append(singer)
+
+                targetSinger.append(singer)
 
             try:
-                songs.append(
-                    Song(songpath, strs[0], strs[1], singer, strs[3], None))
+                song = Song(songpath, strs[0], strs[1],
+                            targetSinger, strs[3], None)
+                songs.append(song)
+
+                for singer in targetSinger:
+                    singer.songs.append(song)
             except ValueError:
                 print("song %s value error!" % basename)
 
@@ -237,6 +254,11 @@ class MainWindow(QWidget):
             self, "請選擇歌庫路徑")
 
         self.songs, self.singers = list_all_songs(songsPath)
+
+        for singer in self.singers:
+            print(singer.name)
+            for song in singer.songs:
+                print("    " + song.name)
         output_csv(self.songs)
 
     def closeEvent(self, event: QEvent):
@@ -314,7 +336,6 @@ class PlayListWidget(QWidget):
         self.mainWindow: MainWindow = mainWindow
         self.playerWindow = PlayerWindow(self)
         self.playerWindow.show()
-        print(self.mainWindow)
         self.selectedSongIndex = -1
 
         self.playList: List[Song] = []  # songs will be played
@@ -604,7 +625,7 @@ class SearchListWidget(QWidget):
         stringList = []
 
         for song in self.searchList:
-            stringList.append(song.name + ", " + song.singer.name)
+            stringList.append(song.name + ", " + song.get_singers_name())
 
         self.searchListView.model().setStringList(stringList)
 
