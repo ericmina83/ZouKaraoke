@@ -82,7 +82,7 @@ singerTypes = {
 
 class Singer():
     def __init__(self, name):
-        self.name = name
+        self.name: str = name
         self.songs: list[Song] = []
 
 
@@ -150,7 +150,7 @@ def diff_two_strings(a: str, b: str) -> float:
 
     for i, s in enumerate(difflib.ndiff(a, b)):
         if s[0] == ' ':
-            continue
+            diff_count -= 5
         elif s[0] == '-':
             diff_count += 2
         elif s[0] == '+':
@@ -189,7 +189,7 @@ def list_all_songs(path):
                     singers.append(singer)
                 else:
                     singer = next(
-                        (singer for singer in singers if singerStr == singer.name),
+                        (singer for singer in singers if singerStr in singer.name or singer.name in singerStr),
                         None)
 
                     if singer is None:
@@ -255,10 +255,10 @@ class MainWindow(QWidget):
 
         self.songs, self.singers = list_all_songs(songsPath)
 
-        for singer in self.singers:
-            print(singer.name)
-            for song in singer.songs:
-                print("    " + song.name)
+        # for singer in self.singers:
+        #     print(singer.name)
+        #     for song in singer.songs:
+        #         print("    " + song.name)
         output_csv(self.songs)
 
     def closeEvent(self, event: QEvent):
@@ -295,6 +295,7 @@ class NewSongInfoForm(QWidget):
 
         self.songNameListView = QListView()
         self.songNameListView.setModel(QStringListModel())
+        self.songNameListView.clicked.connect(self.on_song_selected)
         songNameSearchVbox.addWidget(self.songNameListView)
         hboxTotal.addLayout(songNameSearchVbox)
 
@@ -308,12 +309,22 @@ class NewSongInfoForm(QWidget):
 
         self.singerlistview = QListView()
         self.singerlistview.setModel(QStringListModel())
+        self.singerlistview.clicked.connect(self.on_singer_selected)
         singerSearchVBox.addWidget(self.singerlistview)
         hboxTotal.addLayout(singerSearchVBox)
 
         self.setLayout(hboxTotal)
 
-    def update_songname_list_view(self, text):
+        self.update_songname_list_view('')
+        self.update_singer_list_view('')
+
+        for singer in self.mainWindow.singers:
+            print(singer.name)
+
+    def update_songname_list_view(self, text: str):
+        # self.songs = filter(lambda song: song.name.upper() in text.upper(
+        # ) or text.upper() in song.name.upper(), self.mainWindow.songs)
+
         self.songs = list(sorted(self.mainWindow.songs,
                                  key=lambda song: diff_two_strings(song.name.upper(), text.upper())))
 
@@ -321,12 +332,25 @@ class NewSongInfoForm(QWidget):
         model.setStringList(
             list(map(lambda song: song.name, self.songs)))
 
-    def update_singer_list_view(self):
-        self.singers = list(filter(
-            lambda singer: self.singerLineEdit.text() in singer.name, self.mainWindow.singers))
+    def on_song_selected(self, modelIndex):
+        self.songNameLineEdit.setText(self.songs[modelIndex.row()].name)
+
+    def update_singer_list_view(self, text: str):
+        print(text)
+        # self.singers = list(filter(
+        #     lambda singer: text in singer.name, self.mainWindow.singers))
+
+        self.singers = list(sorted(self.mainWindow.singers,
+                                   key=lambda singer: diff_two_strings(singer.name.upper(), text.upper())))
+
         model: QStringListModel = self.singerlistview.model()
         model.setStringList(
             list(map(lambda singer: singer.name, self.singers)))
+
+    def on_singer_selected(self, modelIndex):
+        self.singerLineEdit.setText(self.singers[modelIndex.row()].name)
+
+    def on_save_clicked(self):
 
 
 class PlayListWidget(QWidget):
@@ -383,16 +407,17 @@ class PlayListWidget(QWidget):
         self.update_play_list_view()
 
     def on_add_song_from_file_clicked(self):
-        self.infoForm.show()
-        # filename, _ = QFileDialog.getOpenFileName(self, "載入新檔案")
-        # if filename != '':
-        #     basename = os.path.splitext(os.path.basename(filename))[0]
-        #     extension = os.path.splitext(os.path.basename(filename))[1]
+        filename, _ = QFileDialog.getOpenFileName(self, "載入新檔案")
+        if filename != '':
+            self.infoForm.songPath = filename
+            self.infoForm.show()
+            # basename = os.path.splitext(os.path.basename(filename))[0]
+            # extension = os.path.splitext(os.path.basename(filename))[1]
 
-        #     if extension.upper() != '.MP4':
-        #         QMessageBox.information(self, "有問題", "檔案不是 MP4 喔！")
-        #     else:
-        #         self.add_song(Song(" ", " ", " ", " ", basename, filename))
+            # if extension.upper() != '.MP4':
+            #     QMessageBox.information(self, "有問題", "檔案不是 MP4 喔!")
+            # else:
+            #     self.add_song(Song(" ", " ", " ", " ", basename, filename))
 
     def add_song(self, song: Song):
 
@@ -410,7 +435,7 @@ class PlayListWidget(QWidget):
             self.playerWindow.load_and_paly_video(song)
             self.update_play_list_view()
         else:
-            QMessageBox.information(self, "Hello", "歌單空了喔！！")
+            QMessageBox.information(self, "Hello", "歌單空了喔!!")
             print("play list empty")
 
     def on_song_item_selected(self, modelIndex):
@@ -438,13 +463,13 @@ class PlayListWidget(QWidget):
         if self.playerWindow.is_playing():
             self.playerWindow.mediaPlayer.stop()
         else:
-            QMessageBox.information(self, '錯誤', '沒有歌曲再撥放喔！')
+            QMessageBox.information(self, '錯誤', '沒有歌曲再撥放喔!')
 
     def update_play_list_view(self):
         stringList: List[str] = []
 
         for song in self.playList:
-            stringList.append(song.name + ", " + song.singer.name)
+            stringList.append(song.name + ", " + song.get_singers_name())
 
         self.playListView.model().setStringList(stringList)
 
@@ -475,8 +500,9 @@ class SearchListWidget(QWidget):
         self.update_search_list_view()
 
     def check_song_correct_or_not(self, song: Song):
-        if self.singerEdit.text().upper() not in song.singer.name.upper():
-            return False
+        for singer in song.singers:
+            if self.singerEdit.text().upper() not in singer.name.upper():
+                return False
 
         if self.songNameEdit.text().upper() not in song.name.upper():
             return False
@@ -518,7 +544,7 @@ class SearchListWidget(QWidget):
 
         # HBox id, label
         idLabel = QLabel()
-        idLabel.setText("歌號：")
+        idLabel.setText("歌號:")
         hboxId.addWidget(idLabel)
 
         # HBox id, Line edit
@@ -532,7 +558,7 @@ class SearchListWidget(QWidget):
 
         # HBox lang, label
         langLabel = QLabel()
-        langLabel.setText("語言：")
+        langLabel.setText("語言:")
         hboxLang.addWidget(langLabel)
 
         # HBox lang, combobox
@@ -549,7 +575,7 @@ class SearchListWidget(QWidget):
 
         # HBox singerType, label
         singerTypeLabel = QLabel()
-        singerTypeLabel.setText("歌手類型：")
+        singerTypeLabel.setText("歌手類型:")
         hboxSingerType.addWidget(singerTypeLabel)
 
         # HBox singerType, combobox
@@ -566,7 +592,7 @@ class SearchListWidget(QWidget):
 
         # HBox singer, label
         singerLabel = QLabel()
-        singerLabel.setText("歌手：")
+        singerLabel.setText("歌手:")
         hbox1.addWidget(singerLabel)
 
         # HBox singer, line edit
@@ -580,7 +606,7 @@ class SearchListWidget(QWidget):
 
         # HBox song name, label
         songNameLabel = QLabel()
-        songNameLabel.setText("歌名：")
+        songNameLabel.setText("歌名:")
         hbox2.addWidget(songNameLabel)
 
         # HBox song name, line edit
@@ -683,7 +709,7 @@ class PlayerWindow(QWidget):
 
     def load_and_paly_video(self, song: Song):
         self.songNameLabel.setText(song.name)
-        self.singerLabel.setText(song.singer.name)
+        self.singerLabel.setText(song.get_singers_name())
         self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(song.path)))
         self.playBtn.setEnabled(True)
         self.play_video()
