@@ -4,7 +4,6 @@ from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 from PyQt5.QtWidgets import QApplication, QWidget, QFileDialog, QStyle, QPushButton, QLineEdit, QHBoxLayout, QSlider, QVBoxLayout, QAction, QMessageBox, QLabel, QListView, QComboBox, QAbstractItemView
 import sys
-from black import diff
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 from ctypes import cast, POINTER
 from comtypes import CLSCTX_ALL
@@ -282,7 +281,10 @@ class NewSongInfoForm(QWidget):
         self.songs: List[Song] = []
         self.mainWindow = mainWindow
 
+        vboxTotal = QVBoxLayout()
+
         hboxTotal = QHBoxLayout()
+        vboxTotal.addLayout(hboxTotal)
 
         songNameSearchVbox = QVBoxLayout()
         hboxSongName = QHBoxLayout()
@@ -313,7 +315,11 @@ class NewSongInfoForm(QWidget):
         singerSearchVBox.addWidget(self.singerlistview)
         hboxTotal.addLayout(singerSearchVBox)
 
-        self.setLayout(hboxTotal)
+        self.saveBtn = QPushButton()
+        self.saveBtn.clicked.connect(self.on_save_clicked)
+        vboxTotal.addWidget(self.saveBtn)
+
+        self.setLayout(vboxTotal)
 
         self.update_songname_list_view('')
         self.update_singer_list_view('')
@@ -351,6 +357,7 @@ class NewSongInfoForm(QWidget):
         self.singerLineEdit.setText(self.singers[modelIndex.row()].name)
 
     def on_save_clicked(self):
+        print('haha')
 
 
 class PlayListWidget(QWidget):
@@ -471,7 +478,9 @@ class PlayListWidget(QWidget):
         for song in self.playList:
             stringList.append(song.name + ", " + song.get_singers_name())
 
-        self.playListView.model().setStringList(stringList)
+        model: QStringListModel = self.playListView.model()
+
+        model.setStringList(stringList)
 
     def close_player(self):
         self.playerWindow.close()
@@ -485,7 +494,7 @@ class SearchListWidget(QWidget):
         self.selectedSong = None
 
         # self.searchList = []
-        self.searchList = self.mainWindow.songs.copy()
+        self.searchList: List[Song] = self.mainWindow.songs.copy()
 
         # hbox (parent layout)
         hbox = QHBoxLayout()
@@ -671,7 +680,7 @@ class PlayerWindow(QWidget):
                             | Qt.WindowType.WindowMaximizeButtonHint)
 
         p = self.palette()
-        p.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.red)
+        p.setColor(QPalette.ColorRole.Window, Qt.GlobalColor.black)
         self.setPalette(p)
 
         # Get default audio device using PyCAW
@@ -809,6 +818,6 @@ if __name__ == '__main__':
     app.setStyleSheet("QLabel{font-size: 18pt;}\n\
                         QListView{font-size: 18pt;}\n\
                         QButton{font-size: 18pt;}")
-    mainwindow = MainWindow()
-    mainwindow.show()
+    mainWindow = MainWindow()
+    mainWindow.show()
     sys.exit(app.exec_())
