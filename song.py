@@ -110,6 +110,10 @@ class Song():
         return self.id + "," + langTypes[self.lang] + "," + self.name + "," + self.get_singers_name() + ',' + singerTypes[self.singerType] + "," + self.path
 
 
+songs: List[Song] = []
+singers: List[Singer] = []
+
+
 def check_filename(basename: str, extension: str):
 
     if extension.upper() != ".mp4".upper():
@@ -137,9 +141,6 @@ def list_all_songs(path):
     path = os.path.abspath(path)
     print("Songs abspath: %s" % path)
 
-    songs: List[Song] = []
-    singers: List[Singer] = []
-
     for (dirpath, dirnames, filenames) in os.walk(path):
 
         for filename in filenames:
@@ -163,7 +164,8 @@ def list_all_songs(path):
                     singers.append(singer)
                 else:
                     singer = next(
-                        (singer for singer in singers if singerStr in singer.name or singer.name in singerStr),
+                        (singer for singer in singers if singerStr.upper()
+                         in singer.name.upper() or singer.name.upper() in singerStr.upper()),
                         None)
 
                     if singer is None:
@@ -185,3 +187,13 @@ def list_all_songs(path):
         break  # do 1 time for iterate 1 layer (level)
 
     return songs, singers
+
+
+def output_csv(songs):
+    outF = open("myOutFile.csv", "w", encoding='utf8')
+
+    for song in songs:
+        outF.write(song.output_csv())
+        outF.write("\n")
+
+    outF.close()
