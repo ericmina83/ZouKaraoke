@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import QWidget, QFileDialog, QPushButton, QHBoxLayout, QVBo
 from typing import List
 from song import *
 from PyPlayer import PlayerWindow
+from newsonginfoform import NewSongInfoForm
 
 
 class PlayListWidget(QWidget):
@@ -12,6 +13,8 @@ class PlayListWidget(QWidget):
         self.playerWindow = PlayerWindow(self.next_song)
         self.playerWindow.show()
         self.selectedSongIndex = -1
+
+        self.infoForm = NewSongInfoForm()
 
         self.playList: list[SongVersion] = []  # songs will be played
 

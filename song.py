@@ -180,8 +180,8 @@ def check_filename(basename: str, extension: str) -> SongVersion | None:
         print("%s lang format is not ok" % basename)
     elif (langTypes[langType] != langStr):  # if lang
         print("%s lang is not match to id" % basename)
-        langType = next(
-            langType for langType in langTypes if langTypes[langType] == strs[1])
+        # langType = next(
+        #     tmpLangType for tmpLangType in langTypes if langTypes[tmpLangType] == strs[1])
 
     # recognize song's name
     songName = strs[3]
@@ -205,8 +205,8 @@ def check_filename(basename: str, extension: str) -> SongVersion | None:
             else:
                 targetSingers_maxSongId[targetSingersStr] += 1
 
-            song = Song(
-                sn, targetSingers_maxSongId[targetSingersStr], targetSingers, songName, langType, singerType)
+            song = Song(sn, targetSingers_maxSongId[targetSingersStr],
+                        targetSingers, songName, langType, singerType)
         else:
             songAlreadyExists = True
     else:
@@ -229,6 +229,10 @@ def check_filename(basename: str, extension: str) -> SongVersion | None:
 
     song.versions.append(version)
     versions.append(version)
+
+    if('BEGGIN' in strs[3].upper()):
+        print('BEGGIN: %c' % sn[0])
+        print(langType)
 
     return version
 
@@ -271,11 +275,11 @@ def list_all_songs(path):
         break  # do 1 time for iterate 1 layer (level)
 
     # log
-    for song in songs:
-        print(song.name)
+    # for song in songs:
+    #     print(song.name)
 
-    for singer in singers:
-        print(singer.name)
+    # for singer in singers:
+    #     print(singer.name)
 
     return songs, singers
 
