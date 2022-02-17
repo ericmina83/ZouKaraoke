@@ -127,7 +127,9 @@ class PlayerWindow(QWidget):
         titleSingerWidget.setLayout(titleSingerHbox)
 
         self.songNameLabel = QLabel("歌名")
+        self.songNameLabel.setStyleSheet("QLabel{color: white}")
         self.singerLabel = QLabel('歌手')
+        self.singerLabel.setStyleSheet("QLabel{color: white}")
 
         titleSingerHbox.addWidget(self.songNameLabel)
         titleSingerHbox.addWidget(self.singerLabel)
