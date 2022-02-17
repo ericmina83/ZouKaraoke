@@ -13,7 +13,7 @@ class PlayListWidget(QWidget):
         self.playerWindow.show()
         self.selectedSongIndex = -1
 
-        self.playList: List[Song] = []  # songs will be played
+        self.playList: list[SongVersion] = []  # songs will be played
 
         # column 1
         column1 = QVBoxLayout()
@@ -67,12 +67,12 @@ class PlayListWidget(QWidget):
             # else:
             #     self.add_song(Song(" ", " ", " ", " ", basename, filename))
 
-    def add_song(self, song: Song):
+    def add_song(self, songVersion: SongVersion):
 
         if self.playerWindow.is_playing() is False and not self.playList:
-            self.playerWindow.load_and_play_video(song)
+            self.playerWindow.load_and_play_video(songVersion)
         else:
-            self.playList.append(song)
+            self.playList.append(songVersion)
             self.update_play_list_view()
 
     def next_song(self):
@@ -116,8 +116,9 @@ class PlayListWidget(QWidget):
     def update_play_list_view(self):
         stringList: List[str] = []
 
-        for song in self.playList:
-            stringList.append(song.name + ", " + song.get_singers_name())
+        for songVersion in self.playList:
+            stringList.append(songVersion.name + ", " +
+                              songVersion.song.get_singers_name())
 
         model: QStringListModel = self.playListView.model()
 

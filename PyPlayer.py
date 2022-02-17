@@ -63,11 +63,12 @@ class PlayerWindow(QWidget):
 
         self.setLayout(hbox)
 
-    def load_and_play_video(self, song: Song):
-        self.songNameLabel.setText(song.name)
-        self.singerLabel.setText(song.get_singers_name())
-        print(song.path)
-        self.mediaPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(song.path)))
+    def load_and_play_video(self, songVersion: SongVersion):
+        self.songNameLabel.setText(songVersion.name)
+        self.singerLabel.setText(songVersion.song.get_singers_name())
+        print(songVersion.songpath)
+        self.mediaPlayer.setMedia(QMediaContent(
+            QUrl.fromLocalFile(songVersion.songpath)))
         self.playBtn.setEnabled(True)
         self.play_video()
 

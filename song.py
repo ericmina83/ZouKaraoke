@@ -1,3 +1,4 @@
+from distutils.log import ERROR
 from enum import Enum
 import re
 import os
@@ -70,35 +71,30 @@ singerTypes = {
 
 
 class Singer():
-    def __init__(self, name):
+    def __init__(self, name, singerId, singerType):
+        self.singerId: int = singerId
         self.name: str = name
         self.songs: list[Song] = []
+        self.singerType: SingerType = singerType
+
+
+class SongVersion():
+    def __init__(self, song, name):
+        self.song: Song = song
+        self.songpath = str
+        self.name = name
 
 
 class Song():
 
-    path: str
-    name: str
-    n_id: str
-    lang: LangType
-    singerType: SingerType
-
-    def __init__(self, path, id, lang, singer: Singer, name, song_original_path):
-
-        if song_original_path is None:
-            self.path: str = path
-            self.name: str = name
-            self.id: str = id
-            self.lang: LangType = LangType(id[0])
-            self.singers: List[Singer] = singer
-            self.singerType = SingerType(int(id[1]))
-        else:
-            self.name: str = name
-            self.id: str = ""
-            self.lang: LangType = LangType.NONE
-            self.singers: List[Singer] = Singer("")
-            self.singerType = SingerType.NONE
-            self.path = song_original_path
+    def __init__(self, sn: str, songId: int, singers: list[Singer], name: str, lang: LangType, singerType: SingerType):
+        self.sn = sn
+        self.name = name
+        self.songId = songId
+        self.singers = singers
+        self.lang = lang
+        self.versions: list[SongVersion] = []
+        self.singerType = singerType
 
     def get_singers_name(self):
         result = self.singers[0].name
@@ -112,35 +108,151 @@ class Song():
 
 songs: List[Song] = []
 singers: List[Singer] = []
+versions: list[SongVersion] = []
+singerType_singerId_singer: dict[SingerType, dict[int, Singer]] = {}
+singerType_maxSingerId: dict[SingerType, int] = {}
+lang_targetSingers_id_song: dict[LangType, dict[str, dict[int, Song]]] = {}
+targetSingers_maxSongId: dict[str, int] = {}
 
 
-def check_filename(basename: str, extension: str):
+def check_filename(basename: str, extension: str) -> SongVersion | None:
 
     if extension.upper() != ".mp4".upper():
         print("%s is not mp4" % basename)
-        return False
+        return None
 
     strs = basename.split("_")
 
     if len(strs) < 4:
         print("%s format isn't correct" % basename)
-        return False
+        return None
 
+    # recognize id
     if idMatch.match(strs[0]) is None:
         print("%s id: %s is not ok" % basename, strs[0])
-        return False
+        return None  # if id can't be recognized, we will return give up this file
 
-    if langMatch.match(strs[1]) is None:
-        print("%s lang is not ok" % basename)
-        return False
+    sn = strs[0]
+    langType = LangType(sn[0])
+    singerType = SingerType(int(sn[1]))
+    singerId = int(sn[2: 5])
+    songId = int(sn[6: 8])
 
-    return True
+    # recognize singers' name
+    singerNames = strs[2].replace('_', '').split('&')
+    targetSingers: List[Singer] = []
+
+    for singerName in singerNames:
+        singerAlreadyExists = False  # a flag record this singer data created or not
+
+        # get singer with same name and don't care the SingerType and singerId
+        singer = next((tmpSinger for tmpSinger in singers if singerName.upper(
+        ) in tmpSinger.name.upper() or tmpSinger.name.upper() in singerName.upper()), None)
+
+        if (singer != None):
+            singerAlreadyExists = True
+        else:
+            singer = singerType_singerId_singer[singerType].get(singerId)
+
+            if (singer != None):  # if there is a singer we want, do nothing
+                if (singer.name != singerName):  # but names of two are different
+                    # we will create a new singer because the name is diffrent from original one
+                    singerType_maxSingerId[singerType] += 1
+                    singerId = singerType_maxSingerId[singerType]
+                    singer = Singer(singerName, singerId, singerType)
+                else:  # if the singer which already created
+                    singerAlreadyExists = True
+            else:  # if there is no singer we are finding, create a new singer
+                singer = Singer(singerName, singerId, singerType)
+
+        targetSingers.append(singer)
+
+        if (singerAlreadyExists == False):
+            singers.append(singer)
+            singerType_singerId_singer[singerType][singerId] = singer
+
+    targetSingers.sort(key=lambda singer: singer.singerId)
+
+    # recognize language
+    langStr = strs[1]
+    if langMatch.match(langStr) is None:  # if lang format is not ok
+        # we will use id's lang
+        print("%s lang format is not ok" % basename)
+    elif (langTypes[langType] != langStr):  # if lang
+        print("%s lang is not match to id" % basename)
+        langType = next(
+            langType for langType in langTypes if langTypes[langType] == strs[1])
+
+    # recognize song's name
+    songName = strs[3]
+    songAlreadyExists = False  # a flag record this singer data created or not
+
+    targetSingersStr = str(targetSingers)
+
+    id_song = lang_targetSingers_id_song[langType].get(targetSingersStr)
+
+    song = None
+
+    if (id_song == None):
+        lang_targetSingers_id_song[langType][targetSingersStr] = {}
+
+        song = next((tmpSong for tmpSong in songs if songName.upper() in tmpSong.name.upper(
+        ) or singer.name.upper() in songName.upper()), None)
+
+        if (song == None):
+            if targetSingers_maxSongId.get(targetSingersStr) == None:
+                targetSingers_maxSongId[targetSingersStr] = 0
+            else:
+                targetSingers_maxSongId[targetSingersStr] += 1
+
+            song = Song(
+                sn, targetSingers_maxSongId[targetSingersStr], targetSingers, songName, langType, singerType)
+        else:
+            songAlreadyExists = True
+    else:
+        song = id_song.get(songId)
+
+        if (song == None):
+            song = Song(sn, songId, targetSingers,
+                        songName, langType, singerType)
+        songAlreadyExists = True
+
+    songs.append(song)
+
+    if(songAlreadyExists == False):
+        lang_targetSingers_id_song[langType][targetSingersStr][songId] = song
+
+    version = SongVersion(song, songName)
+
+    if(song == None):
+        print('song is none')
+
+    song.versions.append(version)
+    versions.append(version)
+
+    return version
 
 
 def list_all_songs(path):
     path = os.path.abspath(path)
     print("Songs abspath: %s" % path)
 
+    # initialization
+    lang_targetSingers_id_song.clear()
+    for langType in LangType:
+        lang_targetSingers_id_song[langType] = {}
+
+    singerType_maxSingerId.clear()
+    for singerType in SingerType:
+        singerType_maxSingerId[singerType] = 0
+
+    singerType_singerId_singer.clear()
+    for singerType in SingerType:
+        singerType_singerId_singer[singerType] = {}
+
+    targetSingers_maxSongId.clear()
+
+    # iteration start
     for (dirpath, dirnames, filenames) in os.walk(path):
 
         for filename in filenames:
@@ -149,42 +261,21 @@ def list_all_songs(path):
             basename = os.path.splitext(filename)[0]
             extension = os.path.splitext(filename)[1]
 
-            if check_filename(basename, extension) is False:
+            version = check_filename(basename, extension)
+
+            if version is None:
                 continue
-
-            strs = basename.split("_")
-
-            singerStrs = strs[2].replace(' ', '').replace('_', '').split('&')
-
-            targetSinger: List[Singer] = []
-
-            for singerStr in singerStrs:
-                if len(singers) == 0:
-                    singer = Singer(singerStr)
-                    singers.append(singer)
-                else:
-                    singer = next(
-                        (singer for singer in singers if singerStr.upper()
-                         in singer.name.upper() or singer.name.upper() in singerStr.upper()),
-                        None)
-
-                    if singer is None:
-                        singer = Singer(singerStr)
-                        singers.append(singer)
-
-                targetSinger.append(singer)
-
-            try:
-                song = Song(songpath, strs[0], strs[1],
-                            targetSinger, strs[3], None)
-                songs.append(song)
-
-                for singer in targetSinger:
-                    singer.songs.append(song)
-            except ValueError:
-                print("song %s value error!" % basename)
+            else:
+                version.songpath = songpath
 
         break  # do 1 time for iterate 1 layer (level)
+
+    # log
+    for song in songs:
+        print(song.name)
+
+    for singer in singers:
+        print(singer.name)
 
     return songs, singers
 

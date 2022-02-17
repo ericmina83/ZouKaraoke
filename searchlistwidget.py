@@ -1,5 +1,3 @@
-
-
 from PyQt5.QtCore import QStringListModel
 from PyQt5.QtWidgets import QWidget,  QPushButton, QLineEdit, QHBoxLayout, QVBoxLayout, QMessageBox, QLabel, QListView, QComboBox, QAbstractItemView
 from typing import Callable, List
@@ -7,14 +5,15 @@ from song import *
 
 
 class SearchListWidget(QWidget):
-    searchList: List[Song] = []
-    selectedSong: Song = None
+    searchList: list[SongVersion] = []
+    selectedSongVersion: SongVersion = None
     add_song_to_play_list_callback: Callable[[Song], None]
 
-    def __init__(self, add_song_to_play_list_callback: Callable[[Song], None]):
+    def __init__(self, add_song_to_play_list_callback: Callable[[SongVersion], None]):
         super().__init__()
 
         self.add_song_to_play_list_callback = add_song_to_play_list_callback
+        self.searchList = versions.copy()
 
         # hbox (parent layout)
         hbox = QHBoxLayout()
@@ -28,7 +27,8 @@ class SearchListWidget(QWidget):
 
         self.update_search_list_view()
 
-    def check_song_correct_or_not(self, song: Song):
+    def check_song_correct_or_not(self, version: SongVersion):
+        song = version.song
         for singer in song.singers:
             if self.singerEdit.text().upper() not in singer.name.upper():
                 return False
@@ -36,7 +36,7 @@ class SearchListWidget(QWidget):
         if self.songNameEdit.text().upper() not in song.name.upper():
             return False
 
-        if self.idEdit.text().upper() not in song.id.upper():
+        if self.snEdit.text().upper() not in song.sn.upper():
             return False
 
         currentSingerType = list(SingerType)[self.singerTypeBox.currentIndex()]
@@ -53,7 +53,7 @@ class SearchListWidget(QWidget):
 
     def check_every_songs_correct_or_not(self):
         self.searchList = list(
-            filter(self.check_song_correct_or_not, songs))
+            filter(self.check_song_correct_or_not, versions))
 
         self.update_search_list_view()
 
@@ -77,9 +77,9 @@ class SearchListWidget(QWidget):
         hboxId.addWidget(idLabel)
 
         # HBox id, Line edit
-        self.idEdit = QLineEdit()
-        self.idEdit.textChanged.connect(self.on_edit_text_changed)
-        hboxId.addWidget(self.idEdit)
+        self.snEdit = QLineEdit()
+        self.snEdit.textChanged.connect(self.on_edit_text_changed)
+        hboxId.addWidget(self.snEdit)
 
         # HBox lang
         hboxLang = QHBoxLayout()
@@ -162,23 +162,24 @@ class SearchListWidget(QWidget):
 
     def on_song_item_double_clicked(self, modelIndex):
         self.add_song_to_play_list_callback(self.searchList[modelIndex.row()])
-        self.selectedSong = None
+        self.selectedSongVersion = None
 
     def on_song_item_selected(self, modelIndex):
-        self.selectedSong = self.searchList[modelIndex.row()]
-        print(self.selectedSong.name)
+        self.selectedSongVersion = self.searchList[modelIndex.row()]
+        print(self.selectedSongVersion.song.name)
 
     def on_select_btn_clicked(self):
-        if self.selectedSong is None:
+        if self.selectedSongVersion is None:
             QMessageBox.information(self, '錯誤', '請選擇歌曲後才能點歌')
         else:
-            self.add_song_to_play_list_callback(self.selectedSong)
-            self.selectedSong = None
+            self.add_song_to_play_list_callback(self.selectedSongVersion)
+            self.selectedSongVersion = None
 
     def update_search_list_view(self):
         stringList = []
 
-        for song in self.searchList:
-            stringList.append(song.name + ", " + song.get_singers_name())
+        for songVersion in self.searchList:
+            stringList.append(songVersion.name + ", " +
+                              songVersion.song.get_singers_name())
 
         self.searchListView.model().setStringList(stringList)
