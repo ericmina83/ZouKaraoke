@@ -2,35 +2,35 @@ from PyQt5.QtCore import QEvent
 from PyQt5.QtWidgets import QWidget, QFileDialog, QHBoxLayout, QAction, QMessageBox
 
 from ZouKaraoke.Song import *
-from ZouKaraoke.PlayListWidget import PlayListWidget
-from ZouKaraoke.SearchListWidget import SearchListWidget
+from ZouKaraoke.Container import Container
+from ZouKaraoke.MainWindow.PlayListWidget import PlayListWidget
+from ZouKaraoke.MainWindow.SearchListWidget import SearchListWidget
 
 
 class MainWindow(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.songs: List[Song] = []
-        self.singers: List[Singer] = []
+        self.container = Container()
 
         self.get_songs_path_from_input_dialog()
 
         quit = QAction("Quit", self)
         quit.triggered.connect(self.closeEvent)
 
-        # hbox (parent)
-        hbox = QHBoxLayout()
+        # hBox (parent)
+        hBox = QHBoxLayout()
 
         # column 1: play list widget
-        self.playListWidget = PlayListWidget()
-        hbox.addWidget(self.playListWidget)
+        self.playListWidget = PlayListWidget(self.container)
+        hBox.addWidget(self.playListWidget)
 
         # column 2: searching list Widget
-        self.searchListWidget = SearchListWidget(self.playListWidget.add_song)
-        hbox.addWidget(self.searchListWidget)
+        self.searchListWidget = SearchListWidget(self.container)
+        hBox.addWidget(self.searchListWidget)
 
         # set parent layout
-        self.setLayout(hbox)
+        self.setLayout(hBox)
 
     def get_songs_path_from_input_dialog(self):
 
@@ -40,7 +40,7 @@ class MainWindow(QWidget):
         #     print(singer.name)
         #     for song in singer.songs:
         #         print("    " + song.name)
-        output_csv(self.songs)
+        output_csv(self.container.songs)
 
     def closeEvent(self, event: QEvent):
         close = QMessageBox()

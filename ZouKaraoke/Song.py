@@ -81,7 +81,7 @@ class Singer:
 class SongVersion:
     def __init__(self, song, name):
         self.song: Song = song
-        self.songpath = str
+        self.songPath = str
         self.name = name
 
 
@@ -309,7 +309,7 @@ def list_all_songs(path):
             if version is None:
                 continue
             else:
-                version.songpath = songpath
+                version.songPath = songpath
 
         break  # do 1 time for iterate 1 layer (level)
 

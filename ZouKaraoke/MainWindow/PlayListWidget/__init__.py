@@ -11,16 +11,20 @@ from PyQt5.QtWidgets import (
 )
 from typing import List
 
-from ZouKaraoke.PyPlayer import PlayerWindow
 from ZouKaraoke.Song import *
-from ZouKaraoke.NewSongInfoForm import NewSongInfoForm
+from ZouKaraoke.Container import Container
+from ZouKaraoke.MainWindow.PlayListWidget.PlayerWindow import PlayerWindow
+from ZouKaraoke.MainWindow.PlayListWidget.NewSongInfoForm import NewSongInfoForm
 
 
 class PlayListWidget(QWidget):
-    def __init__(self):
+    def __init__(self, container: Container):
         super().__init__()
 
-        self.playerWindow = PlayerWindow(self.next_song)
+        container.eventBus.register("add_song", self.add_song)
+        container.eventBus.register("next_song", self.next_song)
+
+        self.playerWindow = PlayerWindow(container)
         self.playerWindow.show()
         self.selectedSongIndex = -1
 
