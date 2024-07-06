@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "zoukaraoke"
+version = "0.1.0"
+description = ""
+authors = ["Jyun-An, Zou <ericmina83@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pyqt5 = "5.15.10"
+pyqt5-qt5 = "5.15.2"
+pycaw = "^20240210"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.scripts]
+start = "ZouKaraoke.Main:main"
