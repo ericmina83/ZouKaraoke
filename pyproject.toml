@@ -17,4 +17,5 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-start = "ZouKaraoke.Main:main"
+start = "Scripts:start"
+test = "Scripts:test"

@@ -14,4 +14,4 @@ class EventBus:
     def emit(self, event: str, *args, **kwargs):
         if event in self.events:
             for callback in self.events[event]:
-                callback(*args, **kwargs)
+                return callback(*args, **kwargs)
