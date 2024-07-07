@@ -324,7 +324,7 @@ def list_all_songs(path):
 
 
 def output_csv(songs):
-    outF = open("myOutFile.csv", "w", encoding="utf8")
+    outF = open("myOutputFile.csv", "w", encoding="utf8")
 
     for song in songs:
         outF.write(song.output_csv())
